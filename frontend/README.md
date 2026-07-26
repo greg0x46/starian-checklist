@@ -31,7 +31,7 @@ npm run test:ci  # Chrome Headless
 Os testes precisam de um Chromium acessível. Sem navegador no host:
 
 ```bash
-docker run --rm -v "$PWD":/frontend -w /frontend node:20 sh -c \
+docker run --rm -v "$PWD":/frontend -w /frontend node:22 sh -c \
   'apt-get update && apt-get install -y --no-install-recommends chromium && \
    CHROME_BIN=$(which chromium) npm run test:ci'
 ```
@@ -41,6 +41,8 @@ O fluxo entre esta interface e a API é verificado pelo smoke em
 
 ## Requisitos
 
-Node 20.19+, a linha mínima suportada pelo Angular 20.
+Node **22.12+** (ou 20.19+, ou 24+), que é a faixa declarada em `engines` e
+suportada pelo Angular 21 — a linha 22 anterior à 22.12 não serve. O `.nvmrc`
+fixa a linha 22: `nvm use`.
 
-Angular 20, TypeScript 5.8, Karma + Jasmine.
+Angular 21, TypeScript 5.9, Karma + Jasmine.

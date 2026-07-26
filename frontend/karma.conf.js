@@ -4,15 +4,14 @@
 module.exports = function (config) {
   config.set({
     basePath: '',
-    // O plugin do builder injeta os arquivos compilados; a configuração aqui
-    // cuida só do runner e do navegador.
-    frameworks: ['jasmine', '@angular-devkit/build-angular'],
+    // O builder `@angular/build:karma` injeta o próprio framework e os arquivos
+    // compilados; a configuração aqui cuida só do runner e do navegador.
+    frameworks: ['jasmine'],
     plugins: [
       require('karma-jasmine'),
       require('karma-chrome-launcher'),
       require('karma-jasmine-html-reporter'),
       require('karma-coverage'),
-      require('@angular-devkit/build-angular/plugins/karma'),
     ],
     client: {
       jasmine: {},

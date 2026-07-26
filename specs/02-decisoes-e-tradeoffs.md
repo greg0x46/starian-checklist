@@ -140,6 +140,15 @@ as três ganharam calibragem explícita de esforço e o que apenas repetia o
 padrão do framework foi removido. O critério é o mesmo do resto da entrega:
 nenhuma camada sem problema que a justifique.
 
+## Upgrades
+
+Laravel e Angular estavam fora das respectivas janelas de suporte. Os upgrades
+foram executados por último, de forma incremental e protegidos pela suíte.
+
+Eles são uma trilha isolada de manutenção: a arquitetura e o contrato podem ser
+avaliados sem depender deles. Em uma entrega com prazo restrito, poderiam ser
+postergados para uma mudança separada.
+
 ## Limites
 
 - API pública e sem autenticação;
@@ -148,5 +157,6 @@ nenhuma camada sem problema que a justifique.
   escopo por não haver múltiplos autores;
 - Compose voltado a desenvolvimento/demonstração;
 - sem paginação ou busca;
+- Angular 21 mantido por compatibilidade com Node 22;
 - advisories apenas em ferramentas de desenvolvimento não bloqueiam o gate de
   dependências entregues ao navegador.

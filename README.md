@@ -26,9 +26,10 @@ como consequência necessária da refatoração.
 | API | boundary stateless sob `/api`, validação e respostas JSON previsíveis |
 | Frontend | serviço HTTP tipado e estados explícitos de loading, erro e mutação |
 | Qualidade | testes proporcionais por camada, smoke principal e CI |
+| Dependências | upgrades isolados, executados por último |
 
 ```text
-Angular 20                       Laravel 13
+Angular 21                       Laravel 13
 ├── AppComponent                 ├── routes/api.php
 │   estado da tela               ├── TaskController
 └── TaskService ─── JSON ──────▶ ├── Form Requests
@@ -87,7 +88,7 @@ Os serviços possuem healthchecks. Volumes nomeados guardam `vendor/` e
 ## Execução nativa
 
 Pré-requisitos: PHP 8.3+ com as extensões usuais do Laravel, Composer e uma
-versão de Node suportada pelo Angular 20 (o projeto usa Node 20).
+versão de Node suportada pelo Angular 21 (o projeto fixa Node 22).
 
 ```bash
 cd backend
@@ -190,3 +191,7 @@ código, para que a próxima tarefa não reproduza o mesmo excesso.
 - Concluir usa atualização otimista com rollback; remover aguarda a confirmação.
 - A API é pública e stateless. Autenticação, paginação e busca não fazem parte do
   escopo.
+- Os upgrades Laravel 11→12→13 e Angular 17→21 foram feitos por último, uma
+  major por vez. São uma etapa isolada de manutenção e não são necessários para
+  compreender a arquitetura principal.
+- Angular 21 foi mantido por estar em suporte e ser compatível com Node 22.
