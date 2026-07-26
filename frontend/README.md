@@ -41,6 +41,6 @@ O fluxo entre esta interface e a API é verificado pelo smoke em
 
 ## Requisitos
 
-Node 20, a linha suportada pelo Angular 19.
+Node 20.19+, a linha mínima suportada pelo Angular 20.
 
-Angular 19, TypeScript 5.8, Karma + Jasmine.
+Angular 20, TypeScript 5.8, Karma + Jasmine.
