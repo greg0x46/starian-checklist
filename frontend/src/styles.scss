@@ -1,1 +1,38 @@
-/* You can add global styles to this file, and also import other style files */
+/* Estilos globais: reset mínimo, tipografia base, paleta e foco visível. */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+:root {
+  color-scheme: light;
+
+  --background: #f4f5f7;
+  --surface: #ffffff;
+  --border: #d5d9e0;
+  --text: #1f2933;
+  --text-muted: #52606d;
+  --primary: #1f6f3f;
+  --danger: #a4262c;
+  --focus: #1c4b91;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--background);
+  color: var(--text);
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+  line-height: 1.5;
+}
+
+/* Navegação por teclado precisa de foco visível em qualquer controle. */
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
