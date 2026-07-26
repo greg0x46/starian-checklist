@@ -1,0 +1,20 @@
+.git
+.gitignore
+.gitattributes
+
+# Segredos e estado local nunca entram no layer da imagem.
+.env
+.env.backup
+.env.production
+database/*.sqlite*
+storage/logs/*.log
+storage/framework/cache/data/*
+storage/framework/sessions/*
+storage/framework/views/*
+
+# Dependências são instaladas no build.
+vendor
+node_modules
+
+.phpunit.cache
+.phpunit.result.cache

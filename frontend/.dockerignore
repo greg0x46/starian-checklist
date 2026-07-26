@@ -1,0 +1,10 @@
+.git
+.gitignore
+.vscode
+
+# Dependências e artefatos são gerados no build.
+node_modules
+dist
+out-tsc
+coverage
+.angular

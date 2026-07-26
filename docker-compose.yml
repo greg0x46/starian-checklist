@@ -1,25 +1,57 @@
-version: '3.8'
+name: starian-checklist
 
 services:
   laravel:
     build:
       context: ./backend
       dockerfile: Dockerfile
+    working_dir: /backend
     volumes:
-      - ./backend:/var/www
+      # O bind precisa apontar para o mesmo diretório em que o processo roda.
+      - ./backend:/backend
+      # Volume nomeado para que o bind acima não esconda o vendor da imagem.
+      - backend-vendor:/backend/vendor
     ports:
       - "8000:8000"
-    working_dir: /backend
     command: php artisan serve --host=0.0.0.0 --port=8000
+    healthcheck:
+      test:
+        - CMD
+        - php
+        - -r
+        - "exit(@file_get_contents('http://127.0.0.1:8000/up') === false ? 1 : 0);"
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
 
   angular:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+    working_dir: /frontend
     volumes:
-      - ./frontend:/app
+      - ./frontend:/frontend
+      - frontend-node-modules:/frontend/node_modules
     ports:
       - "4200:4200"
     command: npm run start -- --host=0.0.0.0
     stdin_open: true
     tty: true
+    depends_on:
+      laravel:
+        condition: service_healthy
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "require('http').get('http://127.0.0.1:4200', (r) => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+
+volumes:
+  backend-vendor:
+  frontend-node-modules:
