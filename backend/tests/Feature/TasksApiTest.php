@@ -11,6 +11,8 @@ class TasksApiTest extends TestCase
 {
     use RefreshDatabase;
 
+    private const FRONTEND_ORIGIN = 'http://localhost:4200';
+
     public function test_list_returns_a_plain_array_ordered_by_id(): void
     {
         $this->storeTask(3, 'Tarefa 3', false, '2026-01-02 10:00:00');
@@ -193,6 +195,24 @@ class TasksApiTest extends TestCase
 
         $response->assertCreated();
         $this->assertSame([], $response->headers->getCookies());
+    }
+
+    public function test_allowed_origin_can_read_the_response(): void
+    {
+        $response = $this->withHeaders(['Origin' => self::FRONTEND_ORIGIN])->getJson('/api/tarefas');
+
+        $response->assertOk();
+        $response->assertHeader('Access-Control-Allow-Origin', self::FRONTEND_ORIGIN);
+    }
+
+    public function test_disallowed_origin_does_not_get_read_permission(): void
+    {
+        $allowed = $this->withHeaders(['Origin' => 'http://malicious.test'])
+            ->getJson('/api/tarefas')
+            ->headers->get('Access-Control-Allow-Origin');
+
+        $this->assertNotSame('http://malicious.test', $allowed);
+        $this->assertNotSame('*', $allowed);
     }
 
     private function storeTask(int $id, string $title, bool $completed, string $createdAt): void
