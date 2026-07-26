@@ -1,46 +1,87 @@
-<div style="padding: 20px; font-family: Arial;">
-  <h1>{{ title }}</h1>
+<main class="page">
+  <h1 class="page__title">{{ title }}</h1>
 
-  <div style="margin-bottom: 20px;">
-    <input 
-      type="text" 
-      [(ngModel)]="newTodo.title" 
-      placeholder="Digite uma nova tarefa"
-      style="padding: 8px; width: 300px;"
-    />
-    <button 
-      (click)="addTodo()" 
-      style="padding: 8px 16px; margin-left: 10px; background-color: #4CAF50; color: white; border: none; cursor: pointer;"
-    >
-      Adicionar
-    </button>
-  </div>
+  <form class="new-task" (ngSubmit)="createTask()">
+    <label class="new-task__label" for="new-task-title">Nova tarefa</label>
 
-  <div>
-    <h2>Tarefas</h2>
-    
-    <div *ngIf="todos.length === 0" style="color: gray;">
-      Nenhuma tarefa encontrada.
+    <div class="new-task__row">
+      <input
+        id="new-task-title"
+        class="new-task__input"
+        type="text"
+        autocomplete="off"
+        maxlength="255"
+        [(ngModel)]="newTaskTitle"
+        [ngModelOptions]="{ standalone: true }"
+        [disabled]="creating"
+      />
+
+      <button class="button button--primary" type="submit" [disabled]="!canCreate">
+        {{ creating ? 'Adicionando…' : 'Adicionar' }}
+      </button>
     </div>
-    
-    <ul style="list-style-type: none; padding: 0;">
-      <li 
-        *ngFor="let todo of todos" 
-        style="padding: 10px; margin-bottom: 5px; border: 1px solid #ddd; display: flex; justify-content: space-between; align-items: center;"
-      >
-        <span [style.text-decoration]="todo.completed ? 'line-through' : 'none'">
-          {{ todo.title }}
-        </span>
-        
-        <button 
-          (click)="removeTodo(todo.id)" 
-          style="background-color: #f44336; color: white; border: none; padding: 5px 10px; cursor: pointer;"
-        >
-          Remover
-        </button>
-      </li>
-    </ul>
-  </div>
-</div>
 
-<router-outlet />
+    @if (createError) {
+      <p class="feedback feedback--error" role="alert">{{ createError }}</p>
+    }
+  </form>
+
+  <section class="tasks">
+    <h2 class="tasks__title">Tarefas</h2>
+
+    @if (loadStatus === 'loading') {
+      <p class="feedback" role="status">Carregando tarefas…</p>
+    }
+
+    @if (loadStatus === 'error') {
+      <div class="feedback feedback--error" role="alert">
+        <span>
+          Não foi possível carregar as tarefas.
+          @if (listMayBeIncomplete) {
+            Esta lista mostra apenas o que foi confirmado nesta sessão e pode estar incompleta.
+          }
+        </span>
+        <button class="button" type="button" (click)="loadTasks()">Tentar novamente</button>
+      </div>
+    }
+
+    @if (mutationError) {
+      <p class="feedback feedback--error" role="alert">{{ mutationError }}</p>
+    }
+
+    @if (tasks.length > 0) {
+      <ul class="task-list">
+        @for (task of tasks; track task.id) {
+          <li class="task" [attr.aria-busy]="isPending(task.id) ? 'true' : null">
+            <input
+              #done
+              class="task__checkbox"
+              type="checkbox"
+              [id]="'task-' + task.id"
+              [checked]="task.completed"
+              [disabled]="isPending(task.id)"
+              (change)="setCompleted(task, done.checked)"
+            />
+
+            <label class="task__title" [class.task__title--completed]="task.completed" [for]="'task-' + task.id">
+              {{ task.title }}
+            </label>
+
+            <span class="task__status">{{ task.completed ? 'Concluída' : 'Pendente' }}</span>
+
+            <button
+              class="button button--danger"
+              type="button"
+              [disabled]="isPending(task.id)"
+              (click)="removeTask(task)"
+            >
+              Remover
+            </button>
+          </li>
+        }
+      </ul>
+    } @else if (loadStatus === 'ready') {
+      <p class="feedback" role="status">Nenhuma tarefa encontrada.</p>
+    }
+  </section>
+</main>

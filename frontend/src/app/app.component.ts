@@ -1,72 +1,161 @@
-import { Component, OnInit } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
-import { CommonModule } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
+import { Component, DestroyRef, OnInit, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
+
+import { Task } from './task.model';
+import { TaskService } from './task.service';
+
+type LoadStatus = 'loading' | 'ready' | 'error';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, CommonModule, FormsModule, HttpClientModule],
+  imports: [FormsModule],
   templateUrl: './app.component.html',
-  styleUrl: './app.component.scss'
+  styleUrl: './app.component.scss',
 })
 export class AppComponent implements OnInit {
-  title = 'Todo List';
-  todos: any[] = [];
-  newTodo: any = { title: '', completed: false };
-  apiUrl = 'http://localhost:8000/tarefas';
+  private readonly taskService = inject(TaskService);
+  private readonly destroyRef = inject(DestroyRef);
 
-  constructor(private http: HttpClient) {}
+  readonly title = 'Lista de tarefas';
 
-  ngOnInit() {
-    this.http.get(this.apiUrl).subscribe(
-      (data: any) => {
-        this.todos = data;
-      },
-      (erro) => {
-        console.error('Erro ao carregar tarefas:', erro);
-        this.todos = [
-          { id: 1, title: 'Tarefa offline 1', completed: false },
-          { id: 2, title: 'Tarefa offline 2', completed: true }
-        ];
-      }
-    );
+  tasks: Task[] = [];
+  loadStatus: LoadStatus = 'loading';
+
+  newTaskTitle = '';
+  creating = false;
+  createError = '';
+
+  mutationError = '';
+
+  private readonly pendingIds = new Set<number>();
+  private mutatedDuringLoad = false;
+
+  ngOnInit(): void {
+    this.loadTasks();
   }
 
-  addTodo() {
-    if (!this.newTodo.title.trim()) return;
-    
-    this.http.post(this.apiUrl, {
-      title: this.newTodo.title
-    }).subscribe(
-      (response: any) => {
-        this.todos.push(response);
-        
-        this.newTodo = { title: '', completed: false };
-      },
-      (erro) => {
-        console.error('Erro ao adicionar tarefa:', erro);
-        const fakeTodo = {
-          id: Math.floor(Math.random() * 1000),
-          title: this.newTodo.title,
-          completed: false
-        };
-        this.todos.push(fakeTodo);
-        this.newTodo = { title: '', completed: false };
-      }
-    );
+  isPending(id: number): boolean {
+    return this.pendingIds.has(id);
   }
 
-  removeTodo(id: number) {
-    this.http.delete(`${this.apiUrl}/${id}`).subscribe(
-      () => {
-        this.todos = this.todos.filter(todo => todo.id !== id);
-      },
-      (erro) => {
-        console.error('Erro ao remover tarefa:', erro);
-        this.todos = this.todos.filter(todo => todo.id !== id);
-      }
-    );
+  get listMayBeIncomplete(): boolean {
+    return this.loadStatus === 'error' && this.tasks.length > 0;
+  }
+
+  loadTasks(): void {
+    this.loadStatus = 'loading';
+    this.mutationError = '';
+    this.mutatedDuringLoad = false;
+
+    this.taskService
+      .list()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (tasks) => {
+          if (this.mutatedDuringLoad) {
+            this.loadTasks();
+            return;
+          }
+
+          this.tasks = tasks;
+          this.loadStatus = 'ready';
+        },
+        error: () => {
+          this.loadStatus = 'error';
+        },
+      });
+  }
+
+  get canCreate(): boolean {
+    const titleLength = this.newTaskTitle.trim().length;
+
+    return !this.creating && titleLength > 0 && titleLength <= 255;
+  }
+
+  createTask(): void {
+    const title = this.newTaskTitle.trim();
+
+    if (title === '' || !this.canCreate) {
+      return;
+    }
+
+    this.creating = true;
+    this.createError = '';
+
+    this.taskService
+      .create(title)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (task) => {
+          this.tasks = [...this.tasks, task];
+          this.newTaskTitle = '';
+          this.creating = false;
+          this.mutatedDuringLoad = true;
+        },
+        error: (error: HttpErrorResponse) => {
+          this.createError =
+            error.status === 422
+              ? 'Título inválido. Use entre 1 e 255 caracteres.'
+              : 'Não foi possível adicionar a tarefa. Tente novamente.';
+          this.creating = false;
+        },
+      });
+  }
+
+  setCompleted(task: Task, completed: boolean): void {
+    if (this.isPending(task.id)) {
+      return;
+    }
+
+    this.pendingIds.add(task.id);
+    this.mutationError = '';
+    this.replaceTask({ ...task, completed });
+
+    this.taskService
+      .setCompleted(task.id, completed)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (updated) => {
+          this.replaceTask(updated);
+          this.pendingIds.delete(task.id);
+          this.mutatedDuringLoad = true;
+        },
+        error: () => {
+          this.replaceTask(task);
+          this.pendingIds.delete(task.id);
+          this.mutationError = `Não foi possível atualizar “${task.title}”. Tente novamente.`;
+        },
+      });
+  }
+
+  removeTask(task: Task): void {
+    if (this.isPending(task.id)) {
+      return;
+    }
+
+    this.pendingIds.add(task.id);
+    this.mutationError = '';
+
+    this.taskService
+      .remove(task.id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.tasks = this.tasks.filter((item) => item.id !== task.id);
+          this.pendingIds.delete(task.id);
+          this.mutatedDuringLoad = true;
+        },
+        error: () => {
+          this.pendingIds.delete(task.id);
+          this.mutationError = `Não foi possível remover “${task.title}”. Tente novamente.`;
+        },
+      });
+  }
+
+  private replaceTask(task: Task): void {
+    this.tasks = this.tasks.map((item) => (item.id === task.id ? task : item));
   }
 }
