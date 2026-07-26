@@ -147,19 +147,13 @@ npm test
 (O e2e depende de um Chrome ou Chromium no PATH; consulte
 [`e2e/README.md`](./e2e/README.md) para o primeiro setup do navegador.)
 
-Os testes de frontend usam Karma, que exige um Chrome ou Chromium disponível no
-sistema — o baseline de qualquer projeto Angular, cujo `ng test` já assume esse
-navegador. Se o binário não estiver no PATH, aponte-o pela variável que o
-`karma-chrome-launcher` respeita:
-
-```bash
-CHROME_BIN=$(which chromium) npm run test:ci
-```
+Os testes unitários do frontend usam Vitest com jsdom e não precisam de
+navegador instalado. O navegador real fica restrito ao smoke em `e2e/`.
 
 A [CI](./.github/workflows/ci.yml) executa backend, frontend, o fluxo principal
 em navegador e a validação do ambiente Compose, e é a execução canônica da
-suíte: roda em ambiente com Chrome garantido a cada push e PR. O badge no topo
-aponta para a execução mais recente da `main`.
+suíte a cada push e PR. O badge no topo aponta para a execução mais recente da
+`main`.
 
 ## Fluxo assistido por IA
 

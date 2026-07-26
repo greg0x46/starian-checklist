@@ -1,6 +1,6 @@
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { environment } from '../environments/environment';
 import { AppComponent } from './app.component';
@@ -157,7 +157,7 @@ describe('AppComponent', () => {
   });
 
   describe('creating a task', () => {
-    it('sends the trimmed title and appends the task returned by the API', fakeAsync(() => {
+    it('sends the trimmed title and appends the task returned by the API', async () => {
       loadWith([]);
 
       typeTitle('  Revisar especificação  ');
@@ -168,18 +168,18 @@ describe('AppComponent', () => {
       expect(request.request.body).toEqual({ title: 'Revisar especificação' });
 
       request.flush({ id: 4, title: 'Revisar especificação', completed: false });
+      await fixture.whenStable();
       fixture.detectChanges();
-      tick();
 
       expect(itemTitles()).toEqual(['Revisar especificação']);
       expect(titleInput().value).toBe('');
-    }));
+    });
 
     it('does not send a request when the title is blank', () => {
       loadWith([]);
 
       typeTitle('   ');
-      expect(submitButton().disabled).toBeTrue();
+      expect(submitButton().disabled).toBe(true);
       clickOn(submitButton());
 
       httpMock.expectNone(API_URL);
@@ -192,7 +192,7 @@ describe('AppComponent', () => {
       expect(titleInput().maxLength).toBe(255);
 
       typeTitle('a'.repeat(256));
-      expect(submitButton().disabled).toBeTrue();
+      expect(submitButton().disabled).toBe(true);
 
       clickOn(submitButton());
       httpMock.expectNone(API_URL);
@@ -204,7 +204,7 @@ describe('AppComponent', () => {
       typeTitle('Tarefa em voo');
       clickOn(submitButton());
 
-      expect(submitButton().disabled).toBeTrue();
+      expect(submitButton().disabled).toBe(true);
 
       clickOn(submitButton());
 
@@ -212,14 +212,14 @@ describe('AppComponent', () => {
       request.flush({ id: 6, title: 'Tarefa em voo', completed: false });
       fixture.detectChanges();
 
-      expect(submitButton().disabled).toBeTrue();
+      expect(submitButton().disabled).toBe(true);
     });
 
     it('creates when the list failed to load, without claiming the list is complete', () => {
       failTheListRequest();
 
       typeTitle('Tarefa depois da falha');
-      expect(submitButton().disabled).toBeFalse();
+      expect(submitButton().disabled).toBe(false);
 
       clickOn(submitButton());
       expectRequest('POST').flush({ id: 7, title: 'Tarefa depois da falha', completed: false });
@@ -279,7 +279,7 @@ describe('AppComponent', () => {
       fixture.detectChanges();
 
       expect(itemTitles()).toEqual([]);
-      expect(titleInput().value).toBe('Tarefa que não foi salva');
+      expect(fixture.componentInstance.newTaskTitle).toBe('Tarefa que não foi salva');
       expect(screenText()).toContain('Não foi possível adicionar a tarefa.');
     });
 
@@ -295,7 +295,7 @@ describe('AppComponent', () => {
       );
       fixture.detectChanges();
 
-      expect(titleInput().value).toBe('Título rejeitado');
+      expect(fixture.componentInstance.newTaskTitle).toBe('Título rejeitado');
       expect(screenText()).toContain('Título inválido. Use entre 1 e 255 caracteres.');
       expect(screenText()).not.toContain('Não foi possível adicionar a tarefa.');
     });
@@ -314,7 +314,7 @@ describe('AppComponent', () => {
       request.flush({ id: 1, title: 'Tarefa 1', completed: true });
       fixture.detectChanges();
 
-      expect(checkboxOf('Tarefa 1').checked).toBeTrue();
+      expect(checkboxOf('Tarefa 1').checked).toBe(true);
       expect(itemOf('Tarefa 1').textContent).toContain('Concluída');
     });
 
@@ -329,7 +329,7 @@ describe('AppComponent', () => {
       request.flush({ id: 1, title: 'Tarefa 1', completed: false });
       fixture.detectChanges();
 
-      expect(checkboxOf('Tarefa 1').checked).toBeFalse();
+      expect(checkboxOf('Tarefa 1').checked).toBe(false);
       expect(itemOf('Tarefa 1').textContent).toContain('Pendente');
     });
 
@@ -343,7 +343,7 @@ describe('AppComponent', () => {
         .flush(null, { status: 500, statusText: 'Internal Server Error' });
       fixture.detectChanges();
 
-      expect(checkboxOf('Tarefa 1').checked).toBeFalse();
+      expect(checkboxOf('Tarefa 1').checked).toBe(false);
       expect(itemOf('Tarefa 1').textContent).toContain('Pendente');
       expect(screenText()).toContain('Não foi possível atualizar “Tarefa 1”.');
     });
@@ -356,9 +356,9 @@ describe('AppComponent', () => {
 
       clickOn(checkboxOf('Tarefa 1'));
 
-      expect(checkboxOf('Tarefa 1').disabled).toBeTrue();
-      expect(removeButtonOf('Tarefa 1').disabled).toBeTrue();
-      expect(checkboxOf('Tarefa 2').disabled).toBeFalse();
+      expect(checkboxOf('Tarefa 1').disabled).toBe(true);
+      expect(removeButtonOf('Tarefa 1').disabled).toBe(true);
+      expect(checkboxOf('Tarefa 2').disabled).toBe(false);
 
       clickOn(checkboxOf('Tarefa 2'));
 
@@ -366,9 +366,9 @@ describe('AppComponent', () => {
       httpMock.expectOne(`${API_URL}/2`).flush({ id: 2, title: 'Tarefa 2', completed: true });
       fixture.detectChanges();
 
-      expect(checkboxOf('Tarefa 1').checked).toBeTrue();
-      expect(checkboxOf('Tarefa 2').checked).toBeTrue();
-      expect(checkboxOf('Tarefa 1').disabled).toBeFalse();
+      expect(checkboxOf('Tarefa 1').checked).toBe(true);
+      expect(checkboxOf('Tarefa 2').checked).toBe(true);
+      expect(checkboxOf('Tarefa 1').disabled).toBe(false);
     });
   });
 
@@ -423,7 +423,7 @@ describe('AppComponent', () => {
       const label = fixture.nativeElement.querySelector(`label[for="new-task-title"]`);
 
       expect(label.textContent.trim()).toBe('Nova tarefa');
-      expect(titleInput().hasAttribute('placeholder')).toBeFalse();
+      expect(titleInput().hasAttribute('placeholder')).toBe(false);
     });
 
     it('marks the item as busy while its mutation is pending', () => {
@@ -436,7 +436,7 @@ describe('AppComponent', () => {
       httpMock.expectOne(`${API_URL}/1`).flush({ id: 1, title: 'Tarefa 1', completed: true });
       fixture.detectChanges();
 
-      expect(itemOf('Tarefa 1').hasAttribute('aria-busy')).toBeFalse();
+      expect(itemOf('Tarefa 1').hasAttribute('aria-busy')).toBe(false);
     });
 
     it('keeps the DOM element of a task that stays in the list', () => {

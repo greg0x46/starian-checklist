@@ -87,7 +87,7 @@ describe('TaskService', () => {
     expect(request.request.body).toBeNull();
 
     request.flush(null, { status: 204, statusText: 'No Content' });
-    expect(completed).toBeTrue();
+    expect(completed).toBe(true);
   });
 
   it('propagates the HTTP error instead of returning fallback data', () => {

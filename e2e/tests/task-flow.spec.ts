@@ -79,6 +79,28 @@ test.describe('fluxo completo da lista de tarefas', () => {
     await expect(screen.submitButton()).toBeDisabled();
   });
 
+  test('keeps the title visible when creation fails', async ({ page }) => {
+    const screen = new TaskScreen(page);
+
+    await screen.open();
+
+    for (const status of [500, 422]) {
+      const title = TaskScreen.uniqueTitle();
+
+      await page.route('**/api/tarefas', (route) =>
+        route.fulfill({ status, contentType: 'application/json', body: '{}' })
+      );
+      await screen.titleField().fill(title);
+      await screen.submitButton().click();
+
+      await expect(page.getByRole('alert')).toContainText(
+        status === 422 ? 'Título inválido.' : 'Não foi possível adicionar a tarefa.'
+      );
+      await expect(screen.titleField()).toHaveValue(title);
+      await page.unroute('**/api/tarefas');
+    }
+  });
+
   test('mostra erro e oferece nova tentativa quando a API não responde', async ({ page }) => {
     await page.route('**/api/tarefas', (route) => route.abort('failed'));
 

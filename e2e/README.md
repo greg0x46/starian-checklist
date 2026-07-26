@@ -1,7 +1,7 @@
 # Smoke em navegador
 
 Único teste que exercita os dois serviços juntos, em um navegador real. As
-suítes de Karma e PHPUnit param na fronteira HTTP, cada uma com o outro lado
+suítes de Vitest e PHPUnit param na fronteira HTTP, cada uma com o outro lado
 simulado. O que só aparece aqui é o encontro delas: CORS, base da API por
 ambiente, contrato e persistência real.
 
@@ -39,8 +39,7 @@ não é possível, aponte `CHROME_BIN` para um Chromium já instalado:
 CHROME_BIN=$(which chromium) npm test
 ```
 
-É a mesma variável que o Karma usa no `frontend/`. Em uma máquina sem navegador
-nenhum, com o ambiente do Compose no ar:
+Em uma máquina sem navegador, com o ambiente do Compose no ar:
 
 ```bash
 docker run --rm --network host -v "$PWD/..":/repo -w /repo/e2e \
