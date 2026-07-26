@@ -51,5 +51,5 @@ suíte não altera nenhum arquivo versionado.
 
 ## Requisitos
 
-PHP 8.2+ (a imagem usa 8.4) com `mbstring`, `dom`, `xml`, `xmlwriter` e
-`pdo_sqlite`, além do Composer. Laravel 12, PHPUnit 11.
+PHP 8.3+ (a imagem usa 8.4) com `mbstring`, `dom`, `xml`, `xmlwriter` e
+`pdo_sqlite`, além do Composer. Laravel 13, PHPUnit 12.
