@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreTaskRequest;
+use App\Http\Requests\UpdateTaskRequest;
 use App\Http\Resources\TaskResource;
 use App\Models\Task;
 use Illuminate\Http\JsonResponse;
@@ -24,6 +25,13 @@ class TaskController extends Controller
         ]);
 
         return TaskResource::make($task)->response()->setStatusCode(201);
+    }
+
+    public function update(UpdateTaskRequest $request, Task $task): TaskResource
+    {
+        $task->update(['completed' => $request->validated('completed')]);
+
+        return TaskResource::make($task);
     }
 
     public function destroy(Task $task): Response

@@ -33,6 +33,7 @@
         <ul>
             <li><code>GET /api/tarefas</code> — lista as tarefas</li>
             <li><code>POST /api/tarefas</code> — cria uma tarefa</li>
+            <li><code>PATCH /api/tarefas/{id}</code> — conclui ou reabre</li>
             <li><code>DELETE /api/tarefas/{id}</code> — remove</li>
             <li><code>GET /up</code> — saúde do serviço</li>
         </ul>

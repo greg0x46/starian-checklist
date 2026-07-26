@@ -63,7 +63,7 @@ class ApiErrorsTest extends TestCase
     {
         Task::create(['title' => 'Tarefa 1']);
 
-        foreach ([$this->deleteJson('/api/tarefas/999')] as $response) {
+        foreach ([$this->deleteJson('/api/tarefas/999'), $this->patchJson('/api/tarefas/999', ['completed' => true])] as $response) {
             $response->assertNotFound();
             $response->assertHeader('Content-Type', 'application/json');
 
