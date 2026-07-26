@@ -10,7 +10,6 @@ type LoadStatus = 'loading' | 'ready' | 'error';
 
 @Component({
   selector: 'app-root',
-  standalone: true,
   imports: [FormsModule],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',

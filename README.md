@@ -28,7 +28,7 @@ como consequência necessária da refatoração.
 | Qualidade | testes proporcionais por camada, smoke principal e CI |
 
 ```text
-Angular 18                       Laravel 13
+Angular 19                       Laravel 13
 ├── AppComponent                 ├── routes/api.php
 │   estado da tela               ├── TaskController
 └── TaskService ─── JSON ──────▶ ├── Form Requests
@@ -87,7 +87,7 @@ Os serviços possuem healthchecks. Volumes nomeados guardam `vendor/` e
 ## Execução nativa
 
 Pré-requisitos: PHP 8.3+ com as extensões usuais do Laravel, Composer e uma
-versão de Node suportada pelo Angular 18 (o projeto usa Node 20).
+versão de Node suportada pelo Angular 19 (o projeto usa Node 20).
 
 ```bash
 cd backend
