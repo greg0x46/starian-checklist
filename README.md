@@ -28,7 +28,7 @@ como consequência necessária da refatoração.
 | Qualidade | testes proporcionais por camada, smoke principal e CI |
 
 ```text
-Angular 17                       Laravel 11
+Angular 17                       Laravel 12
 ├── AppComponent                 ├── routes/api.php
 │   estado da tela               ├── TaskController
 └── TaskService ─── JSON ──────▶ ├── Form Requests
